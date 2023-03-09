@@ -1,5 +1,4 @@
 package mancala.domain;
-import java.util.*;
 
 public abstract class BowlOrKalaha {
 
@@ -28,10 +27,24 @@ public abstract class BowlOrKalaha {
         }
     }
 
+    public boolean checkIfICanPlayThisBowl(){
+        if(getStoneCount() > 0){
+            return true; 
+        }
+        else{
+            return false;
+        }
+    }
+
     public void playBowl(){
-        int numberStonesToDistribute = this.stoneCount;
-        this.stoneCount = 0;
-        (this.getNeighbor()).distributeStones(numberStonesToDistribute, this.getOwner());
+        if (checkIfICanPlayThisBowl()){
+            int numberStonesToDistribute = this.stoneCount;
+            this.stoneCount = 0;
+            (this.getNeighbor()).distributeStones(numberStonesToDistribute, this.getOwner());
+        }
+        else{
+            System.exit(0);
+        }
     }
 
     public BowlOrKalaha goToFirstBowlOnPlayersSide(){
@@ -52,28 +65,13 @@ public abstract class BowlOrKalaha {
         }
     }
 
-    public void checkIfICanPlayThisBowl(){
-        if(getStoneCount() > 0){
-            System.out.println("SpeelBowl");
-            playBowl();
-        }
-        else{
-            System.out.println("Play another bowl, this one is empty...");
-            pickBowl();
-        }
-    }
-
-    public void pickBowl(){
-        Scanner scan = new Scanner(System.in);
-        String playerAtTurn = ((this.getOwner()).getPlayerWhosAtTurn()).getName();
-        System.out.print(playerAtTurn + ", choose a bowl 1-6: ");
-        int bowlNumber = scan.nextInt();
+    public void pickBowlToPlay(int bowlNumber){
         if(1 <= bowlNumber && bowlNumber <= 6){
-            ((this.goToFirstBowlOnPlayersSide()).lookForBowl(bowlNumber)).checkIfICanPlayThisBowl();
+            BowlOrKalaha bowlToPlay = (this.goToFirstBowlOnPlayersSide()).lookForBowl(bowlNumber);
+            bowlToPlay.playBowl();
         }
         else{
-            System.out.println("This is not a valid input, choose again!");
-            pickBowl();
+            System.exit(0);
         }
     }
 
@@ -99,44 +97,38 @@ public abstract class BowlOrKalaha {
 
     public void lastStoneDistributed(Player ownerFirstBowlPlayed){
         if((this instanceof Bowl)){
-            wasIEmpty(ownerFirstBowlPlayed);
-            printBord();
+            if(wasIEmpty(ownerFirstBowlPlayed)){
+                stealIfThisIsMyBowl(ownerFirstBowlPlayed);
+            }
             (this.owner).switchPlayer();
             isGameEnded();
-            //pickBowl();
         }
         else{
-            (this.getNeighbor()).printBord();
             (this.getNeighbor()).isGameEnded();
-            //(this.getNeighbor()).pickBowl();
         }
     }
 
     public boolean isGameEnded(){
         if(goToFirstBowlOnPlayersSide().checkIfRowIsEmpty()){
             whoHasWon();
-            //System.exit(0);
             return true;
         }
         return false;
     }
 
-    public void wasIEmpty(Player ownerFirstBowlPlayed){
+    public boolean wasIEmpty(Player ownerFirstBowlPlayed){
         if(this.stoneCount == 1){
-            canISteal(ownerFirstBowlPlayed);
+            return true; 
         }
+        return false;
     }
 
-    public void canISteal(Player ownerFirstBowlPlayed){
+    public void stealIfThisIsMyBowl(Player ownerFirstBowlPlayed){
         if(this.getOwner() == ownerFirstBowlPlayed){
-            steal();
-        }
-    }
-
-    public void steal(){
-        BowlOrKalaha myKalaha = findMyKalaha();
-        BowlOrKalaha oppositeBowl = findOppositeBowl(0, false);
-        myKalaha.addToKalaha(this.emptyBowlForKalaha() + oppositeBowl.emptyBowlForKalaha());        
+            BowlOrKalaha myKalaha = findMyKalaha();
+            BowlOrKalaha oppositeBowl = findOppositeBowl(0, false);
+            myKalaha.addToKalaha(this.emptyBowlForKalaha() + oppositeBowl.emptyBowlForKalaha()); 
+        }       
     }
 
     public BowlOrKalaha findOppositeBowl(int countOppBowl, boolean foundKalaha){
@@ -190,57 +182,17 @@ public abstract class BowlOrKalaha {
         int stoneCountCurrentPlayer = currentBowl.getFinalStoneCount(0,1);
         int stoneCountOtherPlayer = ((currentBowl.findMyKalaha()).getNeighbor()).getFinalStoneCount(0,1);
         if(stoneCountCurrentPlayer > stoneCountOtherPlayer ){
-            System.out.println( (currentBowl.getOwner()).getName() + " has won! He has " + stoneCountCurrentPlayer  + " stones and " + ((currentBowl.getOwner()).getOpponent()).getName() + " has " + stoneCountOtherPlayer + " stones.");
             return currentBowl.getOwner();
         }
         else if(stoneCountCurrentPlayer < stoneCountOtherPlayer ){
-            System.out.println( ((currentBowl.getOwner()).getOpponent()).getName() + " has won! He has " + stoneCountOtherPlayer  + " stones and " + (currentBowl.getOwner()).getName() + " has " + stoneCountCurrentPlayer  + " stones.");
             return (currentBowl.getOwner()).getOpponent();
         }
         else{
-            System.out.println( "It's a tie! Both players have " + stoneCountCurrentPlayer + " stones.");
             return currentBowl.getOwner();
         }
     }
     
-    public BowlOrKalaha goToFirstBowlPlayer2ForPrintBord(){
-        if((this.getOwner()).getName() == "Player 1"){
-            return (this.findMyKalaha()).getNeighbor();
-        }
-        else{
-            return (((this.findMyKalaha()).getNeighbor()).findMyKalaha()).getNeighbor();
-        }
-    }
-
-    public void printBord(){
-        int countPrintBord = 1; 
-        BowlOrKalaha currentBowl = this.goToFirstBowlPlayer2ForPrintBord();
-        
-        int[] stoneCounts = new int[7];
-        while(countPrintBord <= 7){
-            stoneCounts[ countPrintBord - 1] = currentBowl.getStoneCount();
-            countPrintBord ++;
-            currentBowl = currentBowl.getNeighbor();
-        }
-        System.out.print("\n    ");
-        for(int i = 1; i < 7; i++){
-            System.out.print( (7 - i) % 7  + ":" + stoneCounts[ 6 - i] + " ");
-        }
-        countPrintBord = 1;
-        int[] stoneCounts2 = new int[7];
-        while(countPrintBord <= 7){
-            stoneCounts2[ countPrintBord - 1] = currentBowl.getStoneCount();
-            countPrintBord ++;
-            currentBowl = currentBowl.getNeighbor();
-        }
-        System.out.println("\nK:" + stoneCounts[6] + "                         " + "K:" + stoneCounts2[6]);
-        System.out.print("    ");
-        for(int i = 0; i < 6; i++){
-            System.out.print( (i + 1) % 7  + ":" + stoneCounts2[ i] + " ");
-        }
-        System.out.println("\n");
-    }
-
+    // Should not be in this file, should do this in the constructor
     public void setBordTest(int[] stonecounts, int countSetBord){
         if(countSetBord < 14){
             this.stoneCount = stonecounts[countSetBord];

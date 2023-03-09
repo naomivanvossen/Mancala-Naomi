@@ -21,29 +21,4 @@ public class BowlTest {
         assertEquals("Player 1", ((startBowl.getNeighbor()).getOwner()).getName());
     }
 
-    public BowlOrKalaha returnTheBowlNumberThBowlOrKalaha(int bowlNumber){
-        if(bowlNumber == 1){
-            return startBowl;
-        }
-        BowlOrKalaha next = startBowl.getNeighbor();
-        int tel = 2;
-        while (tel < bowlNumber){
-            tel ++;
-            next = next.getNeighbor();
-        }
-        return next;
-    }
-
-    BowlOrKalaha bKToCheck = returnTheBowlNumberThBowlOrKalaha(8);
-
-    @Test 
-    public void testBowlsOwner(){
-        assertEquals("Player 2",(bKToCheck.getOwner()).getName());
-    }
-
-    @Test 
-    public void testBowlsStoneCount(){
-        assertEquals(4,bKToCheck.getStoneCount());
-    }
-
 }

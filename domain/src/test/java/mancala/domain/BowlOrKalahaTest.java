@@ -23,11 +23,6 @@ public class BowlOrKalahaTest {
     }
 
     @Test 
-    public void finalStoneCount(){
-        assertEquals(24, startBowlP2.getFinalStoneCount(0,1));
-    }
-
-    @Test 
     public void testBowlsOwner(){
         assertEquals("Player 2",(startBowlP2.getOwner()).getName());
     }
@@ -43,9 +38,15 @@ public class BowlOrKalahaTest {
     }
 
     @Test
-    public void testPlayBowl(){
-        (startBowlP1.lookForBowl(4)).playBowl();
-        assertEquals(0, (startBowlP1.lookForBowl(4)).getStoneCount());
+    public void testPlayBowl1(){
+        startBowlP1.pickBowlToPlay(4);
+        assertEquals(5, (startBowlP2.lookForBowl(1)).getStoneCount());
+    }
+
+    @Test
+    public void testPlayBowl2(){
+        startBowlP1.pickBowlToPlay(4);
+        assertEquals(1, (startBowlP1.findMyKalaha()).getStoneCount());
     }
 
     @Test
@@ -60,15 +61,14 @@ public class BowlOrKalahaTest {
         assertEquals("Player 2", isThisKalaha.getOwner().getName());
     }
 
-
     @Test
-    public void testPlayerAllBowls(){
+    public void testPlayerBowls(){
         assertEquals("Player 2", (startBowlP2.lookForBowl(6)).getOwner().getName());
     }
 
     @Test
     public void testSteal(){
-        (startBowlP2.lookForBowl(4)).steal();
+        (startBowlP2.lookForBowl(4)).stealIfThisIsMyBowl(startBowlP2.getOwner());;
         assertEquals(0, (startBowlP1.lookForBowl(3)).getStoneCount()); 
     }
 
@@ -76,7 +76,7 @@ public class BowlOrKalahaTest {
     public void testCanIsteal(){
         int stoneCounts[] = {4,4,4,4,0,5,1,5,5,4,4,4,4,0};
         startBowlP1.setBordTest(stoneCounts,0);
-        (startBowlP1.lookForBowl(1)).checkIfICanPlayThisBowl();;
+        startBowlP1.pickBowlToPlay(1);
         assertEquals(0,(startBowlP2.lookForBowl(2)).getStoneCount());
     }
 
@@ -84,38 +84,43 @@ public class BowlOrKalahaTest {
     public void testCanIsteal2(){
         int stoneCounts[] = {4,4,4,4,0,5,1,5,5,4,4,4,4,0};
         startBowlP1.setBordTest(stoneCounts,0);
-        (startBowlP1.lookForBowl(1)).checkIfICanPlayThisBowl();;
+        startBowlP1.pickBowlToPlay(1);
         assertEquals(0,(startBowlP1.lookForBowl(5)).getStoneCount());
     }
 
     @Test
     public void testStealToKalaha(){
-        (startBowlP2.lookForBowl(4)).steal();
+        (startBowlP2.lookForBowl(4)).stealIfThisIsMyBowl(startBowlP2.getOwner());
         assertEquals(8, (startBowlP2.findMyKalaha()).getStoneCount()); 
     }
 
     @Test
     public void testSkipOwnKalaha(){
-        int initStoneCount = 8;
-        int count = 5;
-        Bowl startBowlP1 = new Bowl(initStoneCount,count);
-        BowlOrKalaha startBowlP2 = (startBowlP1.findMyKalaha()).getNeighbor();
-        (startBowlP2.lookForBowl(6)).playBowl();
-        assertEquals(9, (startBowlP2.lookForBowl(1)).getStoneCount()); 
+        int stoneCounts[] = {4,4,4,4,0,5,1,5,5,4,4,4,8,0};
+        startBowlP1.setBordTest(stoneCounts,0);
+        startBowlP2.pickBowlToPlay(6);
+        assertEquals(6, (startBowlP2.lookForBowl(1)).getStoneCount()); 
     }
 
     @Test 
     public void testeEndInMyKalaha(){
         startBowlP2.getOwner().switchPlayer();
-        (startBowlP2.lookForBowl( 3)).playBowl();
+        startBowlP2.pickBowlToPlay(3);;
         assertEquals( true, (startBowlP2.getOwner()).getHasTurn());   
     }
  
     @Test 
-    public void testHasGameEnded(){
+    public void testHasGameEnded1(){
         int stoneCounts[] = {5,5,4,4,4,4,0,0,0,0,0,0,0,1};
         startBowlP1.setBordTest(stoneCounts,0);
         assertEquals(false, startBowlP2.isGameEnded());
+    }
+
+    @Test 
+    public void testHasGameEnded2(){
+        int stoneCounts[] = {0,0,0,0,0,0,1,5,5,4,4,4,4,0};
+        startBowlP1.setBordTest(stoneCounts,0);
+        assertEquals(true, startBowlP2.isGameEnded());
     }
 
     @Test
@@ -129,6 +134,6 @@ public class BowlOrKalahaTest {
     public void testFinalStoneCount(){
         int stoneCounts[] = {0,0,0,0,0,0,1,5,5,4,4,4,4,0};
         startBowlP1.setBordTest(stoneCounts,0);
-        assertEquals(1, startBowlP1.getFinalStoneCount(0,1));
+        assertEquals(26, startBowlP2.getFinalStoneCount(0,1));
     }
 }

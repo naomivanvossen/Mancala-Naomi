@@ -8,10 +8,5 @@ package mancala.domain;
 public class Mancala {
 
     public static void main(String args[]){
-        int initStoneCount = 1;
-        int count = 5;
-        Bowl startBowl = new Bowl(initStoneCount,count);
-        startBowl.printBord();
-        startBowl.pickBowl();
     }
 }
